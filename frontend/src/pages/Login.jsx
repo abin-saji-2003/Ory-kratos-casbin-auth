@@ -57,6 +57,15 @@ function Login() {
       });
   };
 
+  const handleGitHubLogin = () => {
+    if (!flowId) {
+      setError('No login flow found.');
+      return;
+    }
+
+    window.location.href = `${KRATOS_PUBLIC_URL}/self-service/login/browser?flow=${flowId}&aal=aal1&refresh=false&return_to=http://localhost:3000/&provider=github`;
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white shadow-lg rounded-xl p-8 max-w-md w-full">

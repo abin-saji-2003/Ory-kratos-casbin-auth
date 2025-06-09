@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { startRegistrationFlow } from '../kratos/flow';
+import Swal from 'sweetalert2';
 
 
 function Register() {
@@ -47,8 +48,14 @@ function Register() {
         withCredentials: true,
       })
       .then((res) => {
-        console.log('Signup successful');
-        window.location.href = '/login';
+        Swal.fire({
+          icon: 'success',
+          title: 'Signup Successful!',
+          text: 'Now login to continue.',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          window.location.href = '/login';
+        });
       })
       .catch((err) => {
         console.error('Registration Error:', err);

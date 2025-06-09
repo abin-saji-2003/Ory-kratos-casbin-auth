@@ -25,7 +25,7 @@
           "title": "Full Name"
         }
       },
-      "required": ["email", "name"],
+      "required": ["email","name"],
       "additionalProperties": false
     }
   },

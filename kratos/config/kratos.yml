@@ -66,3 +66,104 @@ hashers:
 courier:
   smtp:
     connection_uri: smtps://stub:stub@stub.stub:465
+
+
+# dsn: ${DSN}
+
+# log:
+#   level: debug
+#   format: text
+
+# secrets:
+#   cookie:
+#     - "your-very-secure-random-cookie-secret"
+
+# session:
+#   cookie:
+#     same_site: Lax
+#     domain: localhost
+
+# serve:
+#   public:
+#     base_url: http://localhost:4433
+#     cors:
+#       enabled: true
+#       allowed_origins:
+#         - http://localhost:3000
+#       allowed_methods:
+#         - GET
+#         - POST
+#         - OPTIONS
+#         - PUT
+#         - PATCH
+#         - DELETE
+#       allowed_headers:
+#         - Cookie
+#         - Content-Type
+#         - Accept
+#       exposed_headers:
+#         - Content-Type
+#         - Set-Cookie
+#       allow_credentials: true
+#   admin:
+#     base_url: http://localhost:4434
+
+# identity:
+#   schemas:
+#     - id: default
+#       url: file:///etc/config/kratos/identity.schema.json
+
+# selfservice:
+#   default_browser_return_url: http://localhost:3000/
+#   allowed_return_urls:
+#     - http://localhost:3000
+#     - http://localhost:3000/login
+#     - http://localhost:3000/register
+#     - http://localhost:3000/dashboard
+#     - http://localhost:3000/settings
+#     - http://localhost:3000/recovery
+#     - http://localhost:3000/verify
+#   flows:
+#     login:
+#       ui_url: http://localhost:3000/login
+#     registration:
+#       ui_url: http://localhost:3000/register
+#     logout:
+#       after:
+#         default_browser_return_url: http://localhost:3000/login
+#     settings:
+#       ui_url: http://localhost:3000/settings
+#     recovery:
+#       ui_url: http://localhost:3000/recovery
+#     verification:
+#       ui_url: http://localhost:3000/verify
+#   methods:
+#     password:
+#       enabled: true
+#     oidc:
+#       enabled: true
+#       config:
+#         providers:
+#           - id: github
+#             provider: github
+#             client_id:  Ov23liQUunv0xyH7c3as 
+#             client_secret: 55410dae4f4c8f72eb3ec61e794765b9c245da38
+#             mapper_url: file:///etc/config/kratos/github.json
+#             scope:
+#               - user:email
+#             requested_claims:
+#               id_token:
+#                 email:
+#                   essential: true
+
+# hashers:
+#   argon2:
+#     parallelism: 1
+#     memory: 512MB
+#     iterations: 2
+#     salt_length: 16
+#     key_length: 16
+
+# courier:
+#   smtp:
+#     connection_uri: smtps://stub:stub@stub.stub:465
