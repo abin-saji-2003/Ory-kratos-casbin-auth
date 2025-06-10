@@ -58,22 +58,40 @@ const Dashboard = () => {
       confirmButtonText: 'Yes',
       cancelButtonText: 'Cancel'
     });
-    if (result.isConfirmed){
+    if (result.isConfirmed) {
       try {
-        const res = await fetch(`${KRATOS_PUBLIC_URL}/self-service/logout/browser`, {
-          credentials: "include",
+        const res = await fetch(`${API_URL}/logout`, {
+          method: 'POST',
+          credentials: 'include',
         });
-    
-        const data = await res.json(); 
+  
+        const data = await res.json();
+  
         if (data.logout_url) {
-          window.location.href = data.logout_url; 
+          window.location.href = data.logout_url;
         } else {
-          console.error("Logout URL not found in response.");
+          console.error('Logout URL not found in response.');
         }
       } catch (err) {
-        console.error("Logout failed:", err);
+        console.error('Logout failed:', err);
       }
     }
+    // if (result.isConfirmed){
+    //   try {
+    //     const res = await fetch(`${KRATOS_PUBLIC_URL}/self-service/logout/browser`, {
+    //       credentials: "include",
+    //     });
+    
+    //     const data = await res.json(); 
+    //     if (data.logout_url) {
+    //       window.location.href = data.logout_url; 
+    //     } else {
+    //       console.error("Logout URL not found in response.");
+    //     }
+    //   } catch (err) {
+    //     console.error("Logout failed:", err);
+    //   }
+    // }
   };
 
   const handleGitHubLogin = () => {
