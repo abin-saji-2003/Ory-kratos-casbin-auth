@@ -10,6 +10,7 @@ function Login() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const [checkingAuth, setCheckingAuth] = useState(true)
   const navigate = useNavigate();
   const KRATOS_PUBLIC_URL = import.meta.env.VITE_KRATOS_PUBLIC_URL;
 
@@ -23,6 +24,7 @@ function Login() {
         navigate('/'); 
       })
       .catch(() => {
+        setCheckingAuth(false)
         startLoginFlow(setFlowId, setCsrfToken, setError)
       });
   }, [navigate]);
@@ -57,14 +59,7 @@ function Login() {
       });
   };
 
-  const handleGitHubLogin = () => {
-    if (!flowId) {
-      setError('No login flow found.');
-      return;
-    }
-
-    window.location.href = `${KRATOS_PUBLIC_URL}/self-service/login/browser?flow=${flowId}&aal=aal1&refresh=false&return_to=http://localhost:3000/&provider=github`;
-  };
+  if (checkingAuth) return null
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
