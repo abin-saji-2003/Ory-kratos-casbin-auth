@@ -13,6 +13,7 @@ func RegisterRoutes(r *gin.Engine) {
 
 	r.GET("/home", middleware.RequireKratosSession(), handler.HomePage)
 	r.POST("/logout", middleware.RequireKratosSession(), handler.LogoutHandler)
+	r.GET("/admin/dashboard", middleware.RequireKratosSession(), handler.AdminDashboard)
 
 	r.GET("/github/repos", handler.GetGitHubRepoHandler)
 }

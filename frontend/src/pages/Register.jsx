@@ -39,7 +39,8 @@ function Register() {
       password: password,
       traits: {
         email: email,
-        name: name
+        name: name,
+        role:"user"
       }
     };
 
