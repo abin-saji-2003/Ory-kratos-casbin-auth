@@ -2,8 +2,10 @@ package middleware
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
+	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +18,7 @@ type Identity struct {
 	} `json:"traits"`
 }
 
-func RequireKratosSession() gin.HandlerFunc {
+func RequireSessionAndMaybeAuthorize(enforcer *casbin.Enforcer, obj string, act string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cookie, err := c.Request.Cookie("ory_kratos_session")
 		if err != nil {
@@ -47,7 +49,35 @@ func RequireKratosSession() gin.HandlerFunc {
 			return
 		}
 
+		userID := session.Identity.ID
+
+		var role string = "none"
+		if enforcer != nil {
+			roles, err := enforcer.GetRolesForUser(userID)
+			if err != nil {
+				log.Println("Failed to get role from enforcer:", err)
+			} else if len(roles) > 0 {
+				role = roles[0]
+			}
+		}
+
+		session.Identity.Traits.Role = role
+
 		c.Set("user", session.Identity)
+
+		if obj != "" && act != "" && enforcer != nil {
+			ok, err := enforcer.Enforce(userID, obj, act)
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Authorization error"})
+				return
+			}
+			if !ok {
+				log.Println("problem here", userID)
+				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+				return
+			}
+		}
+
 		c.Next()
 	}
 }

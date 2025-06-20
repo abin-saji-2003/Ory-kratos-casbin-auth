@@ -53,6 +53,22 @@ selfservice:
     registration:
       ui_url: http://localhost:3000/register
     logout: {}
+    settings:
+      privileged_session_max_age: 15m
+  methods:
+    oidc:
+      enabled: true
+      config:
+        providers:
+          - id: google
+            provider: google
+            client_id: 234823242238-juje2mlfsklm6iipfdaarl4cvkv71lgn.apps.googleusercontent.com
+            client_secret: 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
+            scope:
+              - email
+              - profile
+              - openid
+            mapper_url: file:///etc/config/kratos/google.jsonnet
 
 
 hashers:
@@ -66,4 +82,3 @@ hashers:
 courier:
   smtp:
     connection_uri: smtps://stub:stub@stub.stub:465
-

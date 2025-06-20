@@ -9,11 +9,6 @@ import (
 )
 
 func LogoutHandler(c *gin.Context) {
-	_, exists := c.Get("user")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
-		return
-	}
 
 	c.SetCookie(
 		"github_token",
