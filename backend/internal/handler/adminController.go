@@ -1,23 +1,13 @@
 package handler
 
 import (
-	//"authentication-service/internal/middleware"
+	"authentication-service/internal/model"
 	"encoding/json"
 	"net/http"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 )
-
-type Identity struct {
-	ID       string `json:"id"`
-	SchemaID string `json:"schema_id"`
-	Traits   struct {
-		Email string `json:"email"`
-		Name  string `json:"name"`
-		Role  string `json:"role"`
-	} `json:"traits"`
-}
 
 func AdminDashboard(enforcer *casbin.Enforcer) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -42,7 +32,7 @@ func AdminDashboard(enforcer *casbin.Enforcer) gin.HandlerFunc {
 
 		defer res.Body.Close()
 
-		var users []Identity
+		var users []model.Identity
 
 		if err := json.NewDecoder(res.Body).Decode(&users); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse the users"})
@@ -50,18 +40,12 @@ func AdminDashboard(enforcer *casbin.Enforcer) gin.HandlerFunc {
 		}
 
 		for i, user := range users {
-			roles, err := enforcer.GetRolesForUser(user.ID)
-			if err != nil {
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-					"error": "Failed to get role for user " + user.ID,
-				})
-				return
-			}
+			roles := enforcer.GetRolesForUserInDomain(user.ID, "org:global")
 
-			if len(roles) != 1 {
-				users[i].Traits.Role = "reader"
-			} else {
+			if len(roles) > 0 {
 				users[i].Traits.Role = roles[0]
+			} else {
+				users[i].Traits.Role = "reader"
 			}
 		}
 

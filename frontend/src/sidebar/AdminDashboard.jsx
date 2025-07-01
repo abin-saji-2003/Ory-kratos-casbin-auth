@@ -84,28 +84,14 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200">
-      <nav className="bg-white shadow-lg p-4 flex items-center justify-between">
-        <button
-          className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
-          onClick={() => window.history.back()}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-          </svg>
-          Back
-        </button>
-        <h1 className="text-2xl font-bold text-gray-800 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-          Admin Dashboard
-        </h1>
-        <div className="w-6"></div> 
-      </nav>
   
+      <div className="flex justify-center items-center flex-col text-center mb-2 px-4">        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4">
+          Admin <span className="text-indigo-600">Dashboard</span>
+        </h2>
+        <p className="text-lg text-gray-600 mb-6">User Management</p>
+      </div>
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
-            <h2 className="text-lg font-semibold text-gray-700">User Management</h2>
-            
-          </div>
           
           <div className="divide-y divide-gray-100">
             {users.map((user, index) => {

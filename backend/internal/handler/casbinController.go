@@ -16,11 +16,11 @@ func AssignRoleToUser(enforcer *casbin.Enforcer, userID string, role string) err
 	}
 
 	if len(existingRoles) > 0 {
-		log.Printf("User %s already has role(s): %v — skipping assignment.\n", userID, existingRoles)
+		log.Printf("User %s already has role %v , skipping assignment.\n", userID, existingRoles)
 		return nil
 	}
 
-	ok, err := enforcer.AddGroupingPolicy(userID, role)
+	ok, err := enforcer.AddGroupingPolicy(userID, role, "org:global")
 	if err != nil {
 		return err
 	}
@@ -75,10 +75,6 @@ func EditUserRole(enforcer *casbin.Enforcer, userID string, newRole string) erro
 		}
 	}
 
-	log.Println("newRole")
-
-	log.Println(newRole)
-
 	ok, err := enforcer.AddGroupingPolicy(userID, newRole)
 	if err != nil {
 		return err
@@ -105,8 +101,6 @@ func UserRoleHandler(enforcer *casbin.Enforcer) gin.HandlerFunc {
 				"error": "invalid input",
 			})
 		}
-		log.Println("req")
-		log.Println(req)
 
 		if err := AssignRoleToUser(enforcer, req.UserId, req.UserRole); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to edit role"})

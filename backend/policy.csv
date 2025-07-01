@@ -4,13 +4,13 @@ p, admin, /github/repos, GET
 p, admin, /logout, POST
 p, admin, /home, GET
 
-p, write, /github/repo/create, POST
-p, write, /github/repos, GET
-p, write, /home, GET
+p, writer, /github/repo/create, POST
+p, writer, /github/repos, GET
+p, writer, /home, GET
 
-p, read, /github/repos, GET
-p, read, /home, GET
+p, reader, /github/repos, GET
+p, reader, /home, GET
 
-g, user-123, read
-g, user-456, write
+g, user-1, reader
+g, user-2, writer
 g, 24d69a59-bad6-49a9-b6d2-6aae047e91f0, admin

@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@novu/notification-center": "^2.0.0",
+    "@novu/react": "^3.5.0",
     "@ory/client": "^1.20.11",
     "@ory/client-fetch": "^1.20.11",
     "@ory/kratos-client": "^1.3.8",

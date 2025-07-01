@@ -20,7 +20,6 @@ func main() {
 		log.Fatalf("MongoDB adapter error: %v", err)
 	}
 
-	// Create enforcer
 	e, err := casbin.NewEnforcer(m, adapter)
 	if err != nil {
 		log.Fatalf("Failed to create enforcer: %v", err)
@@ -28,38 +27,62 @@ func main() {
 
 	e.EnableAutoSave(true)
 
-	// Seed policies
+	domain := "org:global"
+
 	policies := [][]string{
-		{"admin", "/admin/dashboard", "GET"},
-		{"admin", "/github/repo/create", "POST"},
-		{"admin", "/github/repos", "GET"},
-		{"admin", "/logout", "POST"},
-		{"admin", "/home", "GET"},
-		{"admin", "/admin/users/:id/role", "PUT"},
-		{"writer", "/github/repo/create", "POST"},
-		{"writer", "/github/repos", "GET"},
-		{"writer", "/home", "GET"},
-		{"writer", "/logout", "GET"},
-		{"reader", "/github/repos", "GET"},
-		{"reader", "/home", "GET"},
-		{"reader", "/logout", "GET"},
+		// Admin permissions
+		{"admin", domain, "/admin/dashboard", "GET"},
+		{"admin", domain, "/github/repo/create", "POST"},
+		{"admin", domain, "/github/repos", "GET"},
+		{"admin", domain, "/logout", "POST"},
+		{"admin", domain, "/home", "GET"},
+		{"admin", domain, "/admin/users/:id/role", "PUT"},
+		{"admin", domain, "/organization/create", "POST"},
+		{"admin", domain, "/organization/list", "GET"},
+		{"admin", domain, "/organization/:orgId/accept", "POST"},
+
+		// Writer permissions
+		{"writer", domain, "/github/repo/create", "POST"},
+		{"writer", domain, "/github/repos", "GET"},
+		{"writer", domain, "/logout", "GET"},
+		{"writer", domain, "/home", "GET"},
+		{"writer", domain, "/organization/create", "POST"},
+		{"writer", domain, "/organization/list", "GET"},
+		{"writer", domain, "/organization/:orgId/accept", "POST"},
+
+		// Reader permissions
+		{"reader", domain, "/github/repos", "GET"},
+		{"reader", domain, "/logout", "GET"},
+		{"reader", domain, "/home", "GET"},
+		{"reader", domain, "/organization/create", "POST"},
+		{"reader", domain, "/organization/list", "GET"},
+		{"reader", domain, "/organization/:orgId/accept", "POST"},
 	}
 
 	groupPolicies := [][]string{
-		{"f415848e-038b-4d30-aa59-e4fa17db8c69", "admin"},
+		{"f415848e-038b-4d30-aa59-e4fa17db8c69", "admin", domain},
 	}
 
 	for _, p := range policies {
-		added, _ := e.AddPolicy(p[0], p[1], p[2])
-		if added {
-			fmt.Println("✅ Policy added:", p)
+		if ok, _ := e.HasPolicy(p[0], p[1], p[2], p[3]); !ok {
+			added, err := e.AddPolicy(p[0], p[1], p[2], p[3])
+			if err != nil {
+				log.Printf("Error adding policy %v: %v\n", p, err)
+			} else if added {
+				fmt.Println("Policy added:", p)
+			}
 		}
 	}
 
 	for _, g := range groupPolicies {
-		added, _ := e.AddGroupingPolicy(g[0], g[1])
-		if added {
-			fmt.Println("✅ Grouping added:", g)
+		if ok, _ := e.HasGroupingPolicy(g[0], g[1], g[2]); !ok {
+			added, err := e.AddGroupingPolicy(g[0], g[1], g[2])
+			if err != nil {
+				log.Printf("Grouping policy error: %v\n", err)
+			} else if added {
+				fmt.Println("Grouping added:", g)
+			}
 		}
 	}
+
 }

@@ -71,7 +71,6 @@ func RegisterHandler(enforcer *casbin.Enforcer) gin.HandlerFunc {
 				}
 			}
 
-			// fallback if message is unrecognized
 			c.Data(kratosRes.StatusCode, "application/json", bodyBytes)
 			return
 		}

@@ -20,8 +20,6 @@ function Login() {
       })
       .then((res) => {
         const userId = res.data.identity.id;
-        console.log("here")
-        console.log(userId)
   
         axios.post('http://localhost:8080/assign-role', {
           userId: userId,

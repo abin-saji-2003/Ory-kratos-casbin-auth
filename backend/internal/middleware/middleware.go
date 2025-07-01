@@ -2,11 +2,10 @@ package middleware
 
 import (
 	"encoding/json"
-	"log"
-	"net/http"
-
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
 )
 
 type Identity struct {
@@ -18,7 +17,7 @@ type Identity struct {
 	} `json:"traits"`
 }
 
-func RequireSessionAndMaybeAuthorize(enforcer *casbin.Enforcer, obj string, act string) gin.HandlerFunc {
+func RequireSessionAndMaybeAuthorize(enforcer *casbin.Enforcer, obj, act string, useOrgDomain bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cookie, err := c.Request.Cookie("ory_kratos_session")
 		if err != nil {
@@ -35,7 +34,7 @@ func RequireSessionAndMaybeAuthorize(enforcer *casbin.Enforcer, obj string, act 
 
 		client := &http.Client{}
 		res, err := client.Do(req)
-		if err != nil || res.StatusCode != 200 {
+		if err != nil || res.StatusCode != http.StatusOK {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired session"})
 			return
 		}
@@ -50,29 +49,31 @@ func RequireSessionAndMaybeAuthorize(enforcer *casbin.Enforcer, obj string, act 
 		}
 
 		userID := session.Identity.ID
-
-		var role string = "none"
-		if enforcer != nil {
-			roles, err := enforcer.GetRolesForUser(userID)
-			if err != nil {
-				log.Println("Failed to get role from enforcer:", err)
-			} else if len(roles) > 0 {
-				role = roles[0]
-			}
-		}
-
-		session.Identity.Traits.Role = role
-
 		c.Set("user", session.Identity)
 
-		if obj != "" && act != "" && enforcer != nil {
-			ok, err := enforcer.Enforce(userID, obj, act)
+		if enforcer != nil && obj != "" && act != "" {
+			var domain string
+			if useOrgDomain {
+				orgID := c.Param("orgId")
+				if orgID == "" {
+					c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Missing orgId in route"})
+					return
+				}
+				domain = "org:" + orgID
+			} else {
+				domain = "org:global"
+			}
+
+			log.Println(userID, domain, obj, act)
+
+			ok, err := enforcer.Enforce(userID, domain, obj, act)
 			if err != nil {
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Authorization error"})
+				log.Println("Casbin enforcement error:", err)
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Authorization failed"})
 				return
 			}
 			if !ok {
-				log.Println("problem here", userID)
+				log.Println("problem here")
 				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 				return
 			}

@@ -66,7 +66,6 @@ func CreateRepoHandler(c *gin.Context) {
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
-	// Verify token first
 	_, _, err = client.Users.Get(ctx, "")
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{

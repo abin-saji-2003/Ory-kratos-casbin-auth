@@ -40,6 +40,8 @@ services:
       - LOG_LEAK_SENSITIVE_VALUES=true
       - SESSION_COOKIE_SAME_SITE=Lax
       - SESSION_COOKIE_DOMAIN=localhost
+      - GOOGLE_CLIENT_ID=234823242238-juje2mlfsklm6iipfdaarl4cvkv71lgn.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=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
     command: serve --dev -c /etc/config/kratos/kratos.yml
     volumes:
       - ./kratos/config:/etc/config/kratos:ro

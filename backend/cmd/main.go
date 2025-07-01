@@ -1,6 +1,7 @@
 package main
 
 import (
+	"authentication-service/internal/db"
 	"authentication-service/internal/routes"
 	"log"
 	"time"
@@ -24,6 +25,8 @@ func init() {
 }
 
 func main() {
+	db.ConnectMongoDB("mongodb://localhost:27017")
+
 	m, err := model.NewModelFromFile("rbac_model.conf")
 	if err != nil {
 		log.Fatalf("Failed to load Casbin model: %v", err)
@@ -45,7 +48,6 @@ func main() {
 		log.Fatalf("Failed to load Casbin policy: %v", err)
 	}
 
-	// CORS setup
 	config := cors.Config{
 		AllowOrigins:     []string{"http://127.0.0.1:3000", "http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -54,14 +56,11 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}
 
-	// Create Gin server
 	router := gin.Default()
 	router.Use(cors.New(config))
 
-	// Register routes with Casbin enforcer
 	routes.RegisterRoutes(router, enforcer)
 
-	// Start server
 	if err := router.Run(":8080"); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
 	}
