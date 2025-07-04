@@ -32,6 +32,26 @@ func InviteUserToOrganization(c *gin.Context) {
 		return
 	}
 
+	users, err := GetAllUsers()
+	if err != nil {
+		log.Println("Error fetching users:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
+		return
+	}
+
+	emailExists := false
+	for _, user := range users {
+		if user.Traits.Email == req.Email {
+			emailExists = true
+			break
+		}
+	}
+
+	if !emailExists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User with the given email does not exist"})
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

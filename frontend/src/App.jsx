@@ -17,6 +17,7 @@ function App() {
         <Route path="/" element={<Dashboard />}>
           <Route index element={<Project/>} />
           <Route path="organization" element={<Organization/>} />
+          <Route path="iam" element={<Organization/>} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="organization-accept/:orgId" element={<AcceptInvitePage />} />
         </Route>

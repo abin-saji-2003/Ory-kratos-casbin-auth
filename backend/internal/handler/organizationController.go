@@ -281,7 +281,10 @@ func GetOrganizationsForAdminHandler(enforcer *casbin.Enforcer) gin.HandlerFunc 
 		}
 
 		collection := db.GetCollection("casbin", "organizations")
-		filter := bson.M{"_id": bson.M{"$in": ToObjectIDs(orgIDs)}}
+		filter := bson.M{
+			"_id":     bson.M{"$in": ToObjectIDs(orgIDs)},
+			"ownerId": user.ID,
+		}
 
 		cursor, err := collection.Find(context.TODO(), filter)
 		if err != nil {

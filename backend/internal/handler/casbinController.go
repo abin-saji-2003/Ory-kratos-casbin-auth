@@ -49,7 +49,7 @@ func EditUserHandler(enforcer *casbin.Enforcer) gin.HandlerFunc {
 
 		userID := c.Param("id")
 
-		if err := EditUserRole(enforcer, userID, req.UserRole); err != nil {
+		if err := EditUserRole(enforcer, userID, req.UserRole, "org:global"); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to edit role"})
 			return
 		}
@@ -61,21 +61,21 @@ func EditUserHandler(enforcer *casbin.Enforcer) gin.HandlerFunc {
 	}
 }
 
-func EditUserRole(enforcer *casbin.Enforcer, userID string, newRole string) error {
-	existingRoles, err := enforcer.GetRolesForUser(userID)
+func EditUserRole(enforcer *casbin.Enforcer, userID, newRole, dom string) error {
+	existingRoles, err := enforcer.GetRolesForUser(userID, dom)
 	if err != nil {
 		return err
 	}
 
 	for _, role := range existingRoles {
-		_, err := enforcer.RemoveGroupingPolicy(userID, role)
+		_, err := enforcer.RemoveGroupingPolicy(userID, role, dom)
 
 		if err != nil {
 			return err
 		}
 	}
 
-	ok, err := enforcer.AddGroupingPolicy(userID, newRole)
+	ok, err := enforcer.AddGroupingPolicy(userID, newRole, dom)
 	if err != nil {
 		return err
 	}
