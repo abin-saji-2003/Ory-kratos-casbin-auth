@@ -75,3 +75,10 @@ type OrganizationInvite struct {
 type InviteRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }
+
+type CreateRepoInput struct {
+	GitHubToken string
+	Name        string
+	Description string
+	Private     bool
+}

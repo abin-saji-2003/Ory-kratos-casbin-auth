@@ -60,7 +60,7 @@ func main() {
 	}
 
 	groupPolicies := [][]string{
-		{"f415848e-038b-4d30-aa59-e4fa17db8c69", "admin", domain},
+		{"723a2bd0-4c77-4375-a74b-0a7f9858960b", "admin", domain},
 	}
 
 	for _, p := range policies {

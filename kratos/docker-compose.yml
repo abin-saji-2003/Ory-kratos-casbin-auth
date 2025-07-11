@@ -22,7 +22,7 @@ services:
     environment:
       - DSN=postgres://postgres:password@kratos-postgres:5432/ory_kratos?sslmode=disable
     volumes:
-      - ./kratos/config:/etc/config/kratos:ro
+      - ./config:/etc/config/kratos:ro
     command: migrate sql -e --yes -c /etc/config/kratos/kratos.yml
     restart: "no"
 
@@ -44,8 +44,13 @@ services:
       - GOOGLE_CLIENT_SECRET=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
     command: serve --dev -c /etc/config/kratos/kratos.yml
     volumes:
-      - ./kratos/config:/etc/config/kratos:ro
+      - ./config:/etc/config/kratos:ro
     restart: unless-stopped
 
 volumes:
   kratos-db:
+
+networks:
+  default:
+    external:
+      name: temporal-network

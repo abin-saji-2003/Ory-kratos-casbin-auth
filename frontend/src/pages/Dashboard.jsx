@@ -58,6 +58,7 @@ const Dashboard = () => {
       }
     }
   };
+  console.log(user)
 
   if (!user) return <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-sky-50 to-rose-50">Loading user info...</div>;
 

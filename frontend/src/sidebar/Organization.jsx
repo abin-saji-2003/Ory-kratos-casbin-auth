@@ -211,14 +211,14 @@ const Organization = () => {
                   ? "Create your first organization to get started" 
                   : "You haven't been added to any organizations yet"}
               </p>
-              {location.pathname === "/iam" && (
+              {/* {location.pathname === "/iam" && (
                 <button
                   onClick={() => setShowCreateModal(true)}
                   className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
                 >
                   Create Organization
                 </button>
-              )}
+              )} */}
             </div>
           )}
         </section>
