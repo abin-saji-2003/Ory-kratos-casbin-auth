@@ -8,8 +8,6 @@ import (
 
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
-
-	//fileadapter "github.com/casbin/casbin/v2/persist/file-adapter"
 	mongodbadapter "github.com/casbin/mongodb-adapter/v3"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"

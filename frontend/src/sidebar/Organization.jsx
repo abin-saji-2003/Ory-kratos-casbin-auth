@@ -22,7 +22,7 @@ const Organization = () => {
     if (location.pathname === "/organization") {
       setUrl("http://localhost:8080/organization/list");
     } else if (location.pathname === "/iam") {
-      setUrl("http://localhost:8080/user/organization/list");
+      setUrl("http://localhost:8080/organization/user/list");
     }
   }, [location.pathname]);
   

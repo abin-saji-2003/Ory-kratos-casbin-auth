@@ -4,6 +4,7 @@ import (
 	"authentication-service/internal/db"
 	"authentication-service/internal/middleware"
 	"authentication-service/internal/model"
+	"authentication-service/internal/utils"
 	"context"
 	"log"
 	"net/http"
@@ -37,12 +38,13 @@ func CreateOrganizationHandler(enforcer *casbin.Enforcer) gin.HandlerFunc {
 		}
 
 		org := model.Organization{
-			ID:        primitive.NewObjectID(),
-			Name:      input.OrganizationName,
-			Bio:       input.Bio,
-			OwnerID:   user.ID,
-			Email:     user.Traits.Email,
-			CreatedAt: time.Now(),
+			ID:              primitive.NewObjectID(),
+			Name:            input.OrganizationName,
+			Bio:             input.Bio,
+			CurrentUserRole: user.Traits.Role,
+			OwnerID:         user.ID,
+			Email:           user.Traits.Email,
+			CreatedAt:       time.Now(),
 		}
 
 		collection := db.GetCollection("casbin", "organizations")
@@ -76,19 +78,18 @@ func CreateOrganizationHandler(enforcer *casbin.Enforcer) gin.HandlerFunc {
 			if exists, _ := enforcer.HasPolicy(p[0], p[1], p[2], p[3]); !exists {
 				added, err := enforcer.AddPolicy(p[0], p[1], p[2], p[3])
 				if err != nil {
-					log.Printf("❌ Failed to add policy %v: %v", p, err)
+					log.Printf("Failed to add policy %v: %v", p, err)
 				} else if added {
-					log.Println("✅ Policy added:", p)
+					log.Println("Policy added:", p)
 				}
 			} else {
-				log.Println("⏩ Policy already exists:", p)
+				log.Println("Policy already exists:", p)
 				continue
 			}
 		}
 
-		// Save all policies
 		if err := enforcer.SavePolicy(); err != nil {
-			log.Println("❌ Failed to save policies to MongoDB:", err)
+			log.Println("Failed to save policies to MongoDB:", err)
 		}
 
 		// Assign admin role to the user
@@ -144,7 +145,7 @@ func GetOrganizationsForUserHandler(enforcer *casbin.Enforcer) gin.HandlerFunc {
 		}
 
 		collection := db.GetCollection("casbin", "organizations")
-		filter := bson.M{"_id": bson.M{"$in": ToObjectIDs(orgIDs)}}
+		filter := bson.M{"_id": bson.M{"$in": utils.ToObjectIDs(orgIDs)}}
 
 		cursor, err := collection.Find(context.TODO(), filter)
 		if err != nil {
@@ -168,16 +169,6 @@ func GetOrganizationsForUserHandler(enforcer *casbin.Enforcer) gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, gin.H{"organizations": organizations})
 	}
-}
-
-func ToObjectIDs(ids []string) []primitive.ObjectID {
-	var objIDs []primitive.ObjectID
-	for _, id := range ids {
-		if oid, err := primitive.ObjectIDFromHex(id); err == nil {
-			objIDs = append(objIDs, oid)
-		}
-	}
-	return objIDs
 }
 
 func UpdateUserRoleHandler(enforcer *casbin.Enforcer) gin.HandlerFunc {
@@ -282,7 +273,7 @@ func GetOrganizationsForAdminHandler(enforcer *casbin.Enforcer) gin.HandlerFunc 
 
 		collection := db.GetCollection("casbin", "organizations")
 		filter := bson.M{
-			"_id":     bson.M{"$in": ToObjectIDs(orgIDs)},
+			"_id":     bson.M{"$in": utils.ToObjectIDs(orgIDs)},
 			"ownerId": user.ID,
 		}
 

@@ -63,12 +63,12 @@ type Organization struct {
 
 type OrganizationInvite struct {
 	ID         primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	OrgID      string             `bson:"orgId" json:"orgId"`         // e.g., "60e6..."
-	Email      string             `bson:"email" json:"email"`         // Email of the invitee
-	InvitedBy  string             `bson:"invitedBy" json:"invitedBy"` // ID of the user who sent the invite
-	Status     string             `bson:"status" json:"status"`       // "pending", "accepted", or "declined"
+	OrgID      string             `bson:"orgId" json:"orgId"`
+	Email      string             `bson:"email" json:"email"`
+	InvitedBy  string             `bson:"invitedBy" json:"invitedBy"`
+	Status     string             `bson:"status" json:"status"`
 	CreatedAt  time.Time          `bson:"createdAt" json:"createdAt"`
-	AcceptedBy string             `bson:"acceptedBy,omitempty" json:"acceptedBy,omitempty"` // User ID of invitee if registered
+	AcceptedBy string             `bson:"acceptedBy,omitempty" json:"acceptedBy,omitempty"`
 	AcceptedAt *time.Time         `bson:"acceptedAt,omitempty" json:"acceptedAt,omitempty"`
 }
 
@@ -76,9 +76,31 @@ type InviteRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
+type SendNotification struct {
+	Email            string
+	OrgId            string
+	ObjectID         primitive.ObjectID
+	CurrentUserEmail string
+}
+
 type CreateRepoInput struct {
 	GitHubToken string
 	Name        string
 	Description string
 	Private     bool
+}
+
+type Org struct {
+	Name string `bson:"name"`
+}
+
+type SendNotificationInput struct {
+	Email   string
+	OrgName string
+	OrgID   string
+}
+
+type CheckIfUserEmail struct {
+	Email            string
+	CurrentUserEmail string
 }

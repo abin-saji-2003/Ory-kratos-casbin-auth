@@ -4,18 +4,20 @@ import (
 	"authentication-service/internal/db"
 	"authentication-service/internal/middleware"
 	"authentication-service/internal/model"
-	"bytes"
+	temporalworkflow "authentication-service/internal/temporal-workflow"
+	"errors"
+
 	"context"
-	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.temporal.io/sdk/client"
+	"go.temporal.io/sdk/temporal"
 )
 
 func InviteUserToOrganization(c *gin.Context) {
@@ -26,92 +28,70 @@ func InviteUserToOrganization(c *gin.Context) {
 	}
 
 	orgID := c.Param("orgId")
+
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
+		return
+	}
+
+	identity, ok := user.(middleware.Identity)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
+		return
+	}
+
+	email := identity.Traits.Email
+
 	objectID, err := primitive.ObjectIDFromHex(orgID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid organization ID"})
 		return
 	}
 
-	users, err := GetAllUsers()
+	temporalClient, err := client.Dial(client.Options{
+		HostPort: "localhost:7233",
+	})
 	if err != nil {
-		log.Println("Error fetching users:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to connect to Temporal"})
 		return
 	}
+	defer temporalClient.Close()
 
-	emailExists := false
-	for _, user := range users {
-		if user.Traits.Email == req.Email {
-			emailExists = true
-			break
-		}
+	input := model.SendNotification{
+		Email:            req.Email,
+		OrgId:            orgID,
+		ObjectID:         objectID,
+		CurrentUserEmail: email,
 	}
 
-	if !emailExists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User with the given email does not exist"})
-		return
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	organizationCollection := db.GetCollection("casbin", "organizations")
+	workflowRun, err := temporalClient.ExecuteWorkflow(ctx, client.StartWorkflowOptions{
+		ID:        "send-notification-" + uuid.New().String(),
+		TaskQueue: "NOVU_TASK_QUEUE",
+	}, temporalworkflow.SendNotificationWorkflow, input)
 
-	var org struct {
-		Name string `bson:"name"`
-	}
-
-	err = organizationCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&org)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Organization not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start workflow: " + err.Error()})
 		return
 	}
 
-	if err := sendNovuNotification(req.Email, org.Name, orgID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send notification"})
+	var result interface{}
+	err = workflowRun.Get(ctx, &result)
+	if err != nil {
+		var appErr *temporal.ApplicationError
+		if errors.As(err, &appErr) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": appErr.Message()})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Invitation sent successfully"})
-}
-
-func sendNovuNotification(toEmail string, organizationName, orgID string) error {
-	log.Println(orgID)
-	url := "https://api.novu.co/v1/events/trigger"
-
-	payload := map[string]interface{}{
-		"name": "organization-invite",
-		"to": map[string]string{
-			"subscriberId": toEmail,
-		},
-		"payload": map[string]string{
-			"organization":   organizationName,
-			"organizationId": orgID,
-		},
-	}
-
-	body, _ := json.Marshal(payload)
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("Authorization", "ApiKey 6cccdf61bd17246df912675572851b7f")
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 300 {
-		return fmt.Errorf("failed to send notification, status: %d", resp.StatusCode)
-	}
-
-	return nil
 }
 
 func AcceptOrganizationInvite(enforcer *casbin.Enforcer) gin.HandlerFunc {
@@ -169,7 +149,6 @@ func AcceptOrganizationInvite(enforcer *casbin.Enforcer) gin.HandlerFunc {
 			return
 		}
 
-		// Step 3: Add Casbin grouping policy
 		_, err = enforcer.AddGroupingPolicy(user.ID, "reader", "org:"+orgID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign role"})

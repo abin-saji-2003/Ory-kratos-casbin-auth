@@ -27,10 +27,9 @@ func RegisterRoutes(r *gin.Engine, enforcer *casbin.Enforcer) {
 	// Organization-specific protected routes
 	r.POST("/organization/create", middleware.RequireSessionAndMaybeAuthorize(enforcer, "/organization/create", "POST", false), handler.CreateOrganizationHandler(enforcer))
 	r.GET("/organization/list", middleware.RequireSessionAndMaybeAuthorize(enforcer, "/organization/list", "GET", false), handler.GetOrganizationsForUserHandler(enforcer))
-	r.GET("/user/organization/list", middleware.RequireSessionAndMaybeAuthorize(enforcer, "/organization/list", "GET", false), handler.GetOrganizationsForAdminHandler(enforcer))
+	r.GET("/organization/user/list", middleware.RequireSessionAndMaybeAuthorize(enforcer, "/organization/list", "GET", false), handler.GetOrganizationsForAdminHandler(enforcer))
 
 	r.POST("/organization/:orgId/accept", middleware.RequireSessionAndMaybeAuthorize(enforcer, "/organization/:orgId/accept", "POST", false), handler.AcceptOrganizationInvite(enforcer))
 	r.POST("/organization/:orgId/invite", middleware.RequireSessionAndMaybeAuthorize(enforcer, "/organization/:orgId/invite", "POST", true), handler.InviteUserToOrganization)
 	r.PUT("/organization/:orgId/user/:userId/role", middleware.RequireSessionAndMaybeAuthorize(enforcer, "/organization/:orgId/user/:userId/role", "PUT", true), handler.UpdateUserRoleHandler(enforcer))
-
 }
