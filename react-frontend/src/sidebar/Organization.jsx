@@ -73,6 +73,16 @@ const Organization = () => {
 
   const handleInvite = async () => {
     if (!inviteEmail || !selectedOrg?.id) return;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(inviteEmail)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Email',
+        text: 'Please enter a valid email address.',
+      });
+      return;
+    }
   
     try {
       await axios.post(

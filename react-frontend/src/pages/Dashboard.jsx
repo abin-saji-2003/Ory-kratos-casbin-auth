@@ -99,15 +99,15 @@ const Dashboard = () => {
                   popover: { zIndex: 9999 },
                   bellButton: {
                     fontSize: "28px",
-                    color: "#6C63FF", // Matching the primary color
+                    color: "#6C63FF", 
                   },
                 }}
                 routerPush={(path) => navigate(path)}
                 appearance={{
                   variables: {
-                    colorPrimary: "#6C63FF", // Consistent purple
-                    colorForeground: "#4A5568", // Soft gray for text
-                  },
+                    colorPrimary: "#6C63FF", 
+                    colorForeground: "#4A5568", 
+                  }, 
                 }}
               />
             </div>

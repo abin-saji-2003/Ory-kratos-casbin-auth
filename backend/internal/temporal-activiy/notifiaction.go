@@ -61,7 +61,7 @@ func GetOrganizationInfo(orgID primitive.ObjectID) (model.Org, error) {
 }
 
 func SendOrganizationInviteNotification(input model.SendNotificationInput) error {
-	url := "https://api.novu.co/v1/events/trigger"
+	url := os.Getenv("NOVU_URL")
 
 	payload := map[string]interface{}{
 		"name": "organization-invite",
