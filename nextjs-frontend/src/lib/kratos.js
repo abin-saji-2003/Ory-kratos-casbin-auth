@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const KRATOS_PUBLIC_URL = import.meta.env.VITE_KRATOS_PUBLIC_URL;
+const KRATOS_PUBLIC_URL = process.env.NEXT_PUBLIC_KRATOS_PUBLIC_URL;
 
 export const startLoginFlow = async (setFlowId, setCsrfToken, setError) => {
   const params = new URLSearchParams(window.location.search);
@@ -33,8 +33,7 @@ export const startLoginFlow = async (setFlowId, setCsrfToken, setError) => {
 };
 
 
-
-export const startRegistrationFlow = async (setFlowId, setCsrfToken, setError) => {
+export const startRegisterFlow = async (setFlowId, setCsrfToken, setError) => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('flow');
   
